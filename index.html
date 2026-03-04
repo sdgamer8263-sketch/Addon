@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Addons Library</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: white; padding: 20px; }
+        h1 { text-align: center; color: #00ff88; }
+        
+        /* Container for the list */
+        #file-list { max-width: 600px; margin: 0 auto; }
+
+        /* Style for each file card */
+        .file-card {
+            background: #1e1e1e;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #333;
+            transition: 0.2s;
+        }
+        .file-card:hover { border-color: #00ff88; transform: translateY(-2px); }
+
+        /* File Name Style */
+        .file-name { font-size: 1.1em; font-weight: bold; }
+
+        /* Download Button Style */
+        .download-btn {
+            background-color: #00ff88;
+            color: #000;
+            padding: 8px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .download-btn:hover { background-color: #00cc6a; }
+    </style>
+</head>
+<body>
+
+    <h1>Available Addons</h1>
+    <div id="file-list">Loading files...</div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const username = 'sdgamer8263-sketch';  // Tumhara GitHub User
+        const repoName = 'YOUR_REPO_NAME';      // Yaha apne Repo ka naam likho (e.g., 'My-Addons')
+        const folderPath = '';                  // Agar files root me hain toh khali rakho, nahi toh folder ka naam (e.g. 'mods')
+        // ---------------------
+
+        async function loadFiles() {
+            const listContainer = document.getElementById('file-list');
+            const apiUrl = `https://api.github.com/repos/${username}/${repoName}/contents/${folderPath}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    listContainer.innerHTML = `<p style="color:red">Error: Repository not found or private.</p>`;
+                    return;
+                }
+
+                listContainer.innerHTML = ''; // Clear loading text
+
+                data.forEach(file => {
+                    // 1. Ignore index.html itself and folders
+                    if (file.name === 'index.html' || file.type === 'dir') return;
+
+                    // 2. NAME CLEANING LOGIC (Yeh tumhara wala part hai)
+                    // Yeh code '.mcaddon' ya koi bhi extension hata dega display ke liye
+                    const displayName = file.name.replace(/\.[^/.]+$/, ""); 
+
+                    // 3. Create HTML
+                    const card = document.createElement('div');
+                    card.className = 'file-card';
+                    card.innerHTML = `
+                        <span class="file-name">${displayName}</span>
+                        <a href="${file.download_url}" class="download-btn" download>Download</a>
+                    `;
+                    listContainer.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error(error);
+                listContainer.innerHTML = "Error loading files.";
+            }
+        }
+
+        loadFiles();
+    </script>
+</body>
+</html>
